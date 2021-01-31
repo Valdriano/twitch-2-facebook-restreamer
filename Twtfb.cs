@@ -14,7 +14,7 @@ namespace Twitch_to_Facebook
         private Dictionary<string, string> settings;
         public void Load()
         {
-            if (!File.Exists("settings.bin"))
+            if( !File.Exists( "settings.bin" ) )
             {
                 settings = new Dictionary<string, string>();
             }
@@ -23,41 +23,41 @@ namespace Twitch_to_Facebook
 
                 IFormatter formatter = new BinaryFormatter();
 
-                Stream stream = new FileStream("settings.bin", FileMode.Open, FileAccess.Read, FileShare.None);
-                settings = (Dictionary<string, string>)formatter.Deserialize(stream);
+                Stream stream = new FileStream( "settings.bin", FileMode.Open, FileAccess.Read, FileShare.None );
+                settings = ( Dictionary<string, string> )formatter.Deserialize( stream );
                 stream.Close();
             }
         }
 
         public void ClearStreamlink()
         {
-            if (settings.ContainsKey("streamlink"))
+            if( settings.ContainsKey( "streamlink" ) )
             {
-                settings.Remove("streamlink");
+                settings.Remove( "streamlink" );
             }
         }
 
-        public void SetFacebook(string key)
+        public void SetFacebook( string key )
         {
-            settings["facebook"] = key;
+            settings[ "facebook" ] = key;
         }
 
-        public void SetTwitch(string key)
+        public void SetTwitch( string key )
         {
-            settings["twitch"] = key;
+            settings[ "twitch" ] = key;
         }
 
-        public string Get(string key)
+        public string Get( string key )
         {
-            if (settings.ContainsKey(key))
+            if( settings.ContainsKey( key ) )
             {
-                return settings[key];
+                return settings[ key ];
             }
 
             return "";
         }
 
-        public bool TestStreamlink(string path)
+        public bool TestStreamlink( string path )
         {
             var proc = new Process
             {
@@ -72,11 +72,11 @@ namespace Twitch_to_Facebook
             };
 
             proc.Start();
-            while (!proc.StandardOutput.EndOfStream)
+            while( !proc.StandardOutput.EndOfStream )
             {
                 string line = proc.StandardOutput.ReadLine();
 
-                if (line.Substring(0, 12) != "streamlink 1")
+                if( line.Substring( 0, 12 ) != "streamlink 2" )
                 {
                     return false;
                 }
@@ -89,7 +89,7 @@ namespace Twitch_to_Facebook
             return false;
         }
 
-        public bool TestFfmpeg(string path)
+        public bool TestFfmpeg( string path )
         {
             var proc = new Process
             {
@@ -104,11 +104,11 @@ namespace Twitch_to_Facebook
             };
 
             proc.Start();
-            while (!proc.StandardOutput.EndOfStream)
+            while( !proc.StandardOutput.EndOfStream )
             {
                 string line = proc.StandardOutput.ReadLine();
 
-                if (line.Substring(0, 9) != "ffmpeg ve")
+                if( line.Substring( 0, 9 ) != "ffmpeg ve" )
                 {
                     return false;
                 }
@@ -120,84 +120,84 @@ namespace Twitch_to_Facebook
 
             return false;
         }
-        public bool SetFfmpeg(string path)
+        public bool SetFfmpeg( string path )
         {
-            if (TestFfmpeg(path))
+            if( TestFfmpeg( path ) )
             {
-                settings["ffmpeg"] = path;
+                settings[ "ffmpeg" ] = path;
                 return true;
             }
             return false;
         }
 
 
-        public bool SetStreamlink(string path)
+        public bool SetStreamlink( string path )
         {
-            if (TestStreamlink(path))
+            if( TestStreamlink( path ) )
             {
-                settings["streamlink"] = path;
-                return true;        
+                settings[ "streamlink" ] = path;
+                return true;
             }
             return false;
         }
 
-        public bool SetSamplingrate(string samplingrate)
+        public bool SetSamplingrate( string samplingrate )
         {
-            settings["samplingrate"] = samplingrate;
+            settings[ "samplingrate" ] = samplingrate;
             return true;
         }
 
         public void ClearFfmpeg()
         {
-            if (settings.ContainsKey("ffmpeg"))
+            if( settings.ContainsKey( "ffmpeg" ) )
             {
-                settings.Remove("ffmpeg");
+                settings.Remove( "ffmpeg" );
             }
         }
 
         public int Start()
         {
             this.Save();
-            if (settings.ContainsKey("ffmpeg") == false)
+            if( settings.ContainsKey( "ffmpeg" ) == false )
             {
                 return 0;
             }
 
-            if (TestFfmpeg(settings["ffmpeg"]) == false)
+            if( TestFfmpeg( settings[ "ffmpeg" ] ) == false )
             {
                 return 1;
             }
 
-            if (settings.ContainsKey("streamlink") == false)
+            if( settings.ContainsKey( "streamlink" ) == false )
             {
                 return 2;
             }
 
-            if (TestStreamlink(settings["streamlink"]) == false)
+            if( TestStreamlink( settings[ "streamlink" ] ) == false )
             {
                 return 3;
             }
 
-            if (settings.ContainsKey("facebook") == false)
+            if( settings.ContainsKey( "facebook" ) == false )
             {
                 return 4;
             }
 
-            if (settings.ContainsKey("twitch") == false)
+            if( settings.ContainsKey( "twitch" ) == false )
             {
                 return 5;
             }
 
-            if (settings.ContainsKey("samplingrate") == false)
+            if( settings.ContainsKey( "samplingrate" ) == false )
             {
                 return 6;
             }
 
 
-                string arg = "\"" + settings["streamlink"] +"\"" + " https://www.twitch.tv/" + settings["twitch"] + " best -O | \""+settings["ffmpeg"] + "\" -i - -deinterlace -vcodec copy -pix_fmt yuv420p -preset medium -r 30 -g 60 -b:v 2500k -ar "+settings["samplingrate"]+" -bufsize 512k -f flv \"rtmps://live-api-s.facebook.com:443/rtmp/"+settings["facebook"]+"\"";
-            StreamWriter writer = new StreamWriter("run.bat");
-            writer.WriteLine(arg);
-            writer.Close();            
+            string arg = "\"" + settings[ "streamlink" ] + "\"" + " https://www.twitch.tv/" + settings[ "twitch" ] + " best -O | \"" + settings[ "ffmpeg" ] + "\" -i - -deinterlace -vcodec copy -pix_fmt yuv420p -preset medium -r 30 -g 60 -b:v 2500k -ar " + settings[ "samplingrate" ] + " -bufsize 512k -f flv \"rtmps://live-api-s.facebook.com:443/rtmp/" + settings[ "facebook" ] + "\"";
+            StreamWriter writer = new StreamWriter( "run.bat" );
+            writer.WriteLine( arg );
+            writer.Close();
             var proc = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -211,24 +211,24 @@ namespace Twitch_to_Facebook
             };
 
             proc.Start();
-            if (proc != null && !proc.HasExited)
+            if( proc != null && !proc.HasExited )
                 proc.WaitForExit();
 
             return 6;
         }
 
-        private void Proc_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        private void Proc_OutputDataReceived( object sender, DataReceivedEventArgs e )
         {
             throw new NotImplementedException();
         }
 
         public void Save()
         {
-            if (settings != null)
+            if( settings != null )
             {
                 IFormatter formatter = new BinaryFormatter();
-                Stream stream = new FileStream("settings.bin", FileMode.Create, FileAccess.Write, FileShare.None);
-                formatter.Serialize(stream, settings);
+                Stream stream = new FileStream( "settings.bin", FileMode.Create, FileAccess.Write, FileShare.None );
+                formatter.Serialize( stream, settings );
                 stream.Close();
             }
         }
